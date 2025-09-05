@@ -29,6 +29,17 @@ const options = {
                 bearerAuth: [],
             },
         ],
+        tags: [
+            {name: "Auth", description: "User authentication and registration"},
+            {name: "Users", description: "User management"},
+            {name: "Mangas", description: "Manga management endpoints"},
+            {name: "Chapters", description: "Manga chapters management"},
+            {
+                name: "Comments",
+                description: "Manga and chapter comments management",
+            },
+            {name: "Favorites", description: "User favorite mangas management"},
+        ],
     },
     apis: ["./src/routes/*.js"],
 };
