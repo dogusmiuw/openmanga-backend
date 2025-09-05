@@ -1,23 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
-const dotenv = require("dotenv");
-dotenv.config();
-
-const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const mangaRoutes = require("./routes/mangaRoutes");
+const chapterRoutes = require("./routes/chapterRoutes");
+const commentRoutes = require("./routes/commentRoutes");
+const favoriteMangaRoutes = require("./routes/favoriteMangaRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middlewares
 app.use(express.json());
 
-// Routes
-app.use("/api/auth", authRoutes);
+// routes
+app.use("/api/users", userRoutes);
+app.use("/api/mangas", mangaRoutes);
+app.use("/api/chapters", chapterRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/favorites", favoriteMangaRoutes);
 
-mongoose.connect(process.env.DB_URI).then(() => {
-    console.log("✅ MongoDB connected");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((err) => console.error("❌ DB connection error:", err));
-  
+mongoose
+    .connect(process.env.DB_URI)
+    .then(() => {
+        console.log("MongoDB connected");
+        app.listen(process.env.PORT || 5000, () =>
+            console.log(`Server running on port ${process.env.PORT || 5000}`),
+        );
+    })
+    .catch(err => console.error(err));
