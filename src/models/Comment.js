@@ -2,16 +2,6 @@ const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema(
     {
-        chapter: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Chapter",
-            required: true,
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
         text: {
             type: String,
             required: [true, "Comment cannot be empty"],
@@ -19,8 +9,23 @@ const commentSchema = new mongoose.Schema(
             minlength: [1, "Comment must be at least 1 character"],
             maxlength: [1000, "Comment cannot exceed 1000 characters"],
         },
+        manga: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Manga",
+            default: null,
+        },
+        chapter: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Chapter",
+            default: null,
+        },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
     },
     {timestamps: true},
 );
 
-export default mongoose.model("Comment", commentSchema);
+module.exports = mongoose.model("Comment", commentSchema);
