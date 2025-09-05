@@ -18,4 +18,4 @@ const favoriteSchema = new mongoose.Schema(
 
 favoriteSchema.index({user: 1, manga: 1}, {unique: true});
 
-export default mongoose.model("Favorite", favoriteSchema);
+module.exports = mongoose.model("Favorite", favoriteSchema);

@@ -38,4 +38,4 @@ const chapterSchema = new mongoose.Schema(
 
 chapterSchema.index({manga: 1, chapterNumber: 1}, {unique: true});
 
-export default mongoose.model("Chapter", chapterSchema);
+module.exports = mongoose.model("Chapter", chapterSchema);
