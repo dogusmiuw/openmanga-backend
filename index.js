@@ -1,11 +1,23 @@
 const express = require("express");
+const mongoose = require("mongoose");
+
+const dotenv = require("dotenv");
+dotenv.config();
+
+const authRoutes = require("./routes/authRoutes");
+
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-});
+// Middlewares
+app.use(express.json());
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-});
+// Routes
+app.use("/api/auth", authRoutes);
+
+mongoose.connect(process.env.DB_URI).then(() => {
+    console.log("✅ MongoDB connected");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  })
+  .catch((err) => console.error("❌ DB connection error:", err));
+  
