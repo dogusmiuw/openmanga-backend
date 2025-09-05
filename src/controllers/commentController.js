@@ -1,18 +1,33 @@
 const Comment = require("../models/Comment");
 const Manga = require("../models/Manga");
+const Chapter = require("../models/Chapter");
 
 exports.createComment = async (req, res) => {
     try {
-        const {mangaId, text} = req.body;
+        const {mangaId, chapterId, text} = req.body;
 
-        const manga = await Manga.findById(mangaId);
-        if (!manga) return res.status(404).json({message: "Manga not found"});
+        if (!mangaId && !chapterId) {
+            return res.status(400).json({
+                message: "You must provide either mangaId or chapterId",
+            });
+        }
 
-        const comment = await Comment.create({
-            text,
-            manga: mangaId,
-            author: req.user.id,
-        });
+        let commentData = {text, author: req.user.id};
+
+        if (chapterId) {
+            const chapter = await Chapter.findById(chapterId);
+            if (!chapter)
+                return res.status(404).json({message: "Chapter not found"});
+            commentData.chapter = chapterId;
+            commentData.manga = chapter.manga;
+        } else if (mangaId) {
+            const manga = await Manga.findById(mangaId);
+            if (!manga)
+                return res.status(404).json({message: "Manga not found"});
+            commentData.manga = mangaId;
+        }
+
+        const comment = await Comment.create(commentData);
 
         res.status(201).json(comment);
     } catch (err) {
@@ -22,11 +37,57 @@ exports.createComment = async (req, res) => {
 
 exports.getCommentsByManga = async (req, res) => {
     try {
-        const comments = await Comment.find({manga: req.params.mangaId})
-            .populate("author", "username")
-            .sort({createdAt: -1});
+        const {mangaId} = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
 
-        res.status(200).json(comments);
+        const chapters = await Chapter.find({manga: mangaId}).select("_id");
+        const chapterIds = chapters.map(c => c._id);
+
+        const total = await Comment.countDocuments({
+            chapter: {$in: chapterIds},
+        });
+
+        const comments = await Comment.find({chapter: {$in: chapterIds}})
+            .populate("author", "username")
+            .populate("chapter", "title")
+            .sort({createdAt: -1})
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            page,
+            totalPages: Math.ceil(total / limit),
+            totalComments: total,
+            comments,
+        });
+    } catch (err) {
+        res.status(500).json({message: "Server error", error: err.message});
+    }
+};
+
+exports.getCommentsByChapter = async (req, res) => {
+    try {
+        const {chapterId} = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
+
+        const total = await Comment.countDocuments({chapter: chapterId});
+
+        const comments = await Comment.find({chapter: chapterId})
+            .populate("author", "username")
+            .sort({createdAt: -1})
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            page,
+            totalPages: Math.ceil(total / limit),
+            totalComments: total,
+            comments,
+        });
     } catch (err) {
         res.status(500).json({message: "Server error", error: err.message});
     }
